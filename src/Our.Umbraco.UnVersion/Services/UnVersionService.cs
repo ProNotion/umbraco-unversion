@@ -24,6 +24,8 @@ namespace Our.Umbraco.UnVersion.Services
             _catchSqlExceptions = catchSqlExceptions;
         }
 
+        public IUnVersionConfig Config => _config;
+
         public void UnVersion(IContent content)
         {
             var configEntries = new List<UnVersionConfigEntry>();
@@ -110,6 +112,14 @@ namespace Our.Umbraco.UnVersion.Services
                     }
 
                     conn.Close();
+                }
+
+                if (!configEntry.IncludeDescendants) continue;
+                
+                // Recursively also UnVersion all descendant nodes
+                foreach (var child in content.Children())
+                {
+                    UnVersion(child);
                 }
             }
         }

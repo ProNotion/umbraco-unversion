@@ -11,6 +11,7 @@ namespace Our.Umbraco.UnVersion
     {
         private readonly static ILog Logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        public bool ExecuteOnStartup { get; set; }
         public IDictionary<string, List<UnVersionConfigEntry>> ConfigEntries { get; set; }
 
         public UnVersionConfig(string configPath)
@@ -30,6 +31,14 @@ namespace Our.Umbraco.UnVersion
 
             var xmlConfig = new XmlDocument();
             xmlConfig.Load(configPath);
+
+            var rootNode = xmlConfig.SelectSingleNode("/unVersionConfig");
+            var hasStartupAttribute = rootNode?.Attributes?["executeOnStartup"] != null;
+            if (hasStartupAttribute && bool.TryParse(rootNode.Attributes["executeOnStartup"].Value,
+                    out var executeOnStartup))
+            {
+                ExecuteOnStartup = executeOnStartup;
+            }
 
             foreach (XmlNode xmlConfigEntry in xmlConfig.SelectNodes("/unVersionConfig/add"))
             {
@@ -54,6 +63,15 @@ namespace Our.Umbraco.UnVersion
                     if (!ConfigEntries.ContainsKey(configEntry.DocTypeAlias))
                         ConfigEntries.Add(configEntry.DocTypeAlias, new List<UnVersionConfigEntry>());
 
+                    if (xmlConfigEntry.Attributes["includeDescendants"] != null)
+                    {
+                        if (bool.TryParse(xmlConfigEntry.Attributes["includeDescendants"].Value,
+                                out var includeDescendants))
+                        {
+                            configEntry.IncludeDescendants = includeDescendants;
+                        }
+                    }
+
                     ConfigEntries[configEntry.DocTypeAlias].Add(configEntry);
                 }
             }
@@ -71,10 +89,14 @@ namespace Our.Umbraco.UnVersion
         public string RootXPath { get; set; }
         public int MaxDays { get; set; }
         public int MaxCount { get; set; }
+        
+        public bool IncludeDescendants { get; set; }
     }
 
     public interface IUnVersionConfig
     {
+        bool ExecuteOnStartup { get;  }
+        
         IDictionary<string, List<UnVersionConfigEntry>> ConfigEntries { get; }
     }
 }

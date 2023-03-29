@@ -24,13 +24,21 @@ namespace Our.Umbraco.UnVersion
 
             // Hookup event listener
             ContentService.Published += ContentServicePublished;
+
+            if (!UnVersionContext.Instance.UnVersionService.Config.ExecuteOnStartup) return;
+            
+            var rootContent = applicationContext.Services.ContentService.GetRootContent();
+            foreach (var entity in rootContent)
+            {
+                UnVersionContext.Instance.UnVersionService.UnVersion(entity);
+            }
         }
 
         void ContentServicePublished(IPublishingStrategy sender, PublishEventArgs<IContent> e)
         {
             if (HttpContext.Current == null)
                 return;
-
+            
             foreach (var entity in e.PublishedEntities)
             {
                 UnVersionContext.Instance.UnVersionService.UnVersion(entity);
