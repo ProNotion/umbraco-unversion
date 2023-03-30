@@ -24,7 +24,10 @@ namespace Our.Umbraco.UnVersion.Services
             _catchSqlExceptions = catchSqlExceptions;
         }
 
-        public IUnVersionConfig Config => _config;
+        public IUnVersionConfig Config
+        {
+            get { return _config; }
+        }
 
         public void UnVersion(IContent content)
         {

@@ -33,9 +33,9 @@ namespace Our.Umbraco.UnVersion
             xmlConfig.Load(configPath);
 
             var rootNode = xmlConfig.SelectSingleNode("/unVersionConfig");
-            var hasStartupAttribute = rootNode?.Attributes?["executeOnStartup"] != null;
-            if (hasStartupAttribute && bool.TryParse(rootNode.Attributes["executeOnStartup"].Value,
-                    out var executeOnStartup))
+            var hasStartupAttribute = rootNode.Attributes != null && rootNode.Attributes["executeOnStartup"] != null;
+            bool executeOnStartup;
+            if (hasStartupAttribute && bool.TryParse(rootNode.Attributes["executeOnStartup"].Value, out executeOnStartup))
             {
                 ExecuteOnStartup = executeOnStartup;
             }
@@ -65,8 +65,8 @@ namespace Our.Umbraco.UnVersion
 
                     if (xmlConfigEntry.Attributes["includeDescendants"] != null)
                     {
-                        if (bool.TryParse(xmlConfigEntry.Attributes["includeDescendants"].Value,
-                                out var includeDescendants))
+                        bool includeDescendants;
+                        if (bool.TryParse(xmlConfigEntry.Attributes["includeDescendants"].Value, out includeDescendants))
                         {
                             configEntry.IncludeDescendants = includeDescendants;
                         }
